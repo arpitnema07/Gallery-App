@@ -1,45 +1,52 @@
 package com.example.galleryapp.main
 
 import android.app.Application
-import android.util.Log
 import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
+import androidx.paging.Pager
+import androidx.paging.PagingConfig
+import androidx.paging.PagingData
+import androidx.paging.cachedIn
 import com.example.galleryapp.models.Photo
+import com.example.galleryapp.models.Result
+import com.example.galleryapp.network.PhotosPagingSource
 import com.example.galleryapp.repository.MainRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
 import javax.inject.Inject
 
 @HiltViewModel
 class MainViewModel @Inject constructor(
     application: Application,
+    private val pagingSource: PhotosPagingSource,
     private val mainRepository: MainRepository
 ) : AndroidViewModel(application)  {
 
-    private val _photos = MutableLiveData<List<Photo>>()
-    val photos: LiveData<List<Photo>> = _photos
+    val hideSearch: MutableLiveData<Boolean> = MutableLiveData(false)
 
-    private val _error = MutableLiveData<String>()
-    val error: LiveData<String> = _error
+//    private val _isLoading = MutableLiveData<Boolean>()
 
-    fun getRecentPhotos() {
-        Log.d("TAG", "getRecentPhotos: 1")
-        viewModelScope.launch {
-            try {
-                val photosResponse = mainRepository.getRecentPhotos(0)
-                Log.d("TAG", "getRecentPhotos: "+photosResponse.photos.photo.size)
-                _photos.value = photosResponse.photos.photo
-            } catch (e: Exception) {
-                _error.value = e.message
-                e.printStackTrace()
-            }
+    fun getRecentPhotos(): Flow<PagingData<Photo>> {
+        return Pager(
+            config = PagingConfig(
+                pageSize = 1,
+                maxSize = 3,
+                enablePlaceholders = true,
+            ),
+            pagingSourceFactory = { pagingSource }
+        ).flow.cachedIn(viewModelScope)
+    }
+
+    fun searchPhotos(query: String) = flow {
+        emit(Result.Loading)
+        val response = mainRepository.searchPhotos(query)
+        if (response.isSuccessful && response.body()!=null){
+            val apiResponse = response.body()!!.photos.photo
+            emit(Result.Success(apiResponse))
+        }else {
+            emit(Result.Error(response.errorBody().toString()))
         }
     }
-
-    fun retry() {
-        getRecentPhotos()
-    }
-
 }

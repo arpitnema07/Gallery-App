@@ -1,6 +1,7 @@
 package com.example.galleryapp.main
 
 import android.os.Bundle
+import android.view.View
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.drawerlayout.widget.DrawerLayout
@@ -30,9 +31,6 @@ class MainActivity : AppCompatActivity() {
 
         viewModel.getRecentPhotos()
 
-        binding.appBarMain.fab.setOnClickListener {
-            // open Search Fragment
-        }
         val drawerLayout: DrawerLayout = binding.drawerLayout
         val navView: NavigationView = binding.navView
         val navController = findNavController(R.id.nav_host_fragment_content_main)
@@ -45,6 +43,16 @@ class MainActivity : AppCompatActivity() {
         )
         setupActionBarWithNavController(navController, appBarConfiguration)
         navView.setupWithNavController(navController)
+
+        binding.appBarMain.fab.setOnClickListener {
+            // open Search Fragment
+            navController.navigate(R.id.action_nav_home_to_searchPhotos)
+        }
+
+        viewModel.hideSearch.observe(this){
+            if (it) binding.appBarMain.fab.visibility = View.GONE
+            else binding.appBarMain.fab.visibility = View.VISIBLE
+        }
     }
 
     override fun onSupportNavigateUp(): Boolean {

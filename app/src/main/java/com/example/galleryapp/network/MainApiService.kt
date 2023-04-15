@@ -1,6 +1,7 @@
 package com.example.galleryapp.network
 
 import com.example.galleryapp.models.ApiResponse
+import retrofit2.Response
 import retrofit2.http.GET
 import retrofit2.http.Query
 
@@ -15,10 +16,10 @@ interface MainApiService {
     @GET("?method=flickr.photos.getRecent&extras=url_s&api_key=${API_KEY}&per_page=20&format=json&nojsoncallback=1")
     suspend fun getRecentPhotos(
         @Query("page") page: Int
-    ): ApiResponse
+    ): Response<ApiResponse>
 
     @GET("?method=flickr.photos.search&extras=url_s&api_key=${API_KEY}&format=json&nojsoncallback=1")
     suspend fun searchPhotos(
         @Query("text") query: String,
-    ): ApiResponse
+    ): Response<ApiResponse>
 }

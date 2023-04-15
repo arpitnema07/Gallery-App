@@ -1,23 +1,22 @@
-package com.example.galleryapp.main
+package com.example.galleryapp.main.adapter
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.example.galleryapp.databinding.ItemPhotoBinding
 import com.example.galleryapp.models.Photo
+import com.example.galleryapp.utils.PhotoDiffUtilCallBack
 
-class PhotosAdapter() :
-    ListAdapter<Photo,PhotosAdapter.ViewHolder>(PhotoDiffUtilCallBack()) {
+class SearchAdapter :
+    ListAdapter<Photo, SearchAdapter.ViewHolder>(PhotoDiffUtilCallBack()) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        val binding = ItemPhotoBinding.inflate(LayoutInflater.from(parent.context),parent,false)
-        return ViewHolder(binding)
+        return ViewHolder.from(parent)
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.bind(getItem(position))
+        getItem(position)?.let { holder.bind(it) }
     }
 
     class ViewHolder(private val binding: ItemPhotoBinding) : RecyclerView.ViewHolder(binding.root){
@@ -25,16 +24,13 @@ class PhotosAdapter() :
             binding.photo = photo
             binding.executePendingBindings()
         }
-
+        companion object{
+            fun from(parent: ViewGroup): ViewHolder {
+                val layoutInflater = LayoutInflater.from(parent.context)
+                val binding = ItemPhotoBinding.inflate(layoutInflater, parent, false)
+                return ViewHolder(binding)
+            }
+        }
     }
 }
 
-class PhotoDiffUtilCallBack : DiffUtil.ItemCallback<Photo>() {
-    override fun areItemsTheSame(oldItem: Photo, newItem: Photo): Boolean {
-        return oldItem.id == newItem.id
-    }
-
-    override fun areContentsTheSame(oldItem: Photo, newItem: Photo): Boolean {
-        return oldItem == newItem
-    }
-}

@@ -1,6 +1,7 @@
 package com.example.galleryapp.di
 
 import com.example.galleryapp.network.MainApiService
+import com.example.galleryapp.network.PhotosPagingSource
 import com.example.galleryapp.repository.MainRepository
 import dagger.Module
 import dagger.Provides
@@ -23,6 +24,12 @@ object AppModule {
             .addConverterFactory(GsonConverterFactory.create())
             .build()
             .create(MainApiService::class.java)
+    }
+
+    @Provides
+    @Singleton
+    fun providePhotosPagingSource(mainRepository: MainRepository): PhotosPagingSource {
+        return PhotosPagingSource(mainRepository)
     }
 
     @Provides
