@@ -10,9 +10,13 @@ import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.paging.LoadState
 import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.galleryapp.R
 import com.example.galleryapp.databinding.FragmentHomeBinding
 import com.example.galleryapp.main.MainViewModel
 import com.example.galleryapp.main.adapter.PhotosAdapter
+import com.example.galleryapp.main.adapter.PhotosLoadStateAdapter
+import com.example.galleryapp.utils.PhotosSpanSizeLookup
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -35,11 +39,14 @@ class HomeFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         binding = FragmentHomeBinding.inflate(layoutInflater)
-        photosAdapter = PhotosAdapter()
 
+        photosAdapter = PhotosAdapter()
         binding.photos.apply {
-            layoutManager = GridLayoutManager(requireContext(), 2)
-            adapter = photosAdapter
+            layoutManager = LinearLayoutManager(context)
+            adapter = photosAdapter.withLoadStateHeaderAndFooter(
+                header = PhotosLoadStateAdapter { photosAdapter.retry() },
+                footer = PhotosLoadStateAdapter { photosAdapter.retry() }
+            )
         }
 
         lifecycleScope.launch {

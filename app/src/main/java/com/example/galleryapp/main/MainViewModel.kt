@@ -13,8 +13,11 @@ import com.example.galleryapp.models.Result
 import com.example.galleryapp.network.PhotosPagingSource
 import com.example.galleryapp.repository.MainRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.withTimeoutOrNull
 import javax.inject.Inject
 
 @HiltViewModel
@@ -40,13 +43,21 @@ class MainViewModel @Inject constructor(
     }
 
     fun searchPhotos(query: String) = flow {
-        emit(Result.Loading)
-        val response = mainRepository.searchPhotos(query)
-        if (response.isSuccessful && response.body()!=null){
-            val apiResponse = response.body()!!.photos.photo
-            emit(Result.Success(apiResponse))
-        }else {
-            emit(Result.Error(response.errorBody().toString()))
+        try {
+            emit(Result.Loading)
+            val response = withTimeoutOrNull(5000) {
+                mainRepository.searchPhotos(query)
+            }
+            if (response?.isSuccessful == true && response.body() != null) {
+                val apiResponse = response.body()!!.photos.photo
+                emit(Result.Success(apiResponse))
+            } else {
+                val errorMessage = response?.errorBody()?.string() ?: "Unknown error"
+                emit(Result.Error(errorMessage))
+            }
+        } catch (e: Exception) {
+            emit(Result.Error("Exception occurred: ${e.message}"))
         }
-    }
+    }.flowOn(Dispatchers.IO)
+
 }

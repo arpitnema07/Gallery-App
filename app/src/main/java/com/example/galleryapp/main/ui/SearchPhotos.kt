@@ -13,9 +13,11 @@ import com.example.galleryapp.databinding.FragmentSearchBinding
 import com.example.galleryapp.main.MainViewModel
 import com.example.galleryapp.main.adapter.SearchAdapter
 import com.example.galleryapp.models.Result
+import com.google.android.material.snackbar.Snackbar
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.subjects.PublishSubject
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.util.*
 import java.util.concurrent.TimeUnit
@@ -65,8 +67,10 @@ class SearchPhotos : Fragment() {
                                 }
                                 is Result.Error -> {
                                     binding.progressBar.visibility = View.GONE
-//                                    errorTextView.text = result.message
-//                                    errorTextView.visibility = View.VISIBLE
+                                    Snackbar.make(binding.root, "Error", Snackbar.LENGTH_LONG)
+                                    .setAction("Retry"){
+
+                                    }.show()
                                 }
                                 is Result.Loading -> {
                                     binding.progressBar.visibility = View.VISIBLE
